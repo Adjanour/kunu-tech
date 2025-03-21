@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "480946073496",
+    "project_id": "kunutech-34a30",
+    "storage_bucket": "kunutech-34a30.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:480946073496:android:af30070eecae34750c05ed",
+        "android_client_info": {
+          "package_name": "com.kunutech.kunutech"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "480946073496-i059srdnk66df598ngk0hc3pocalltu6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kunutech.kunutech",
+            "certificate_hash": "5254279e6bd9b023077de611a0473cbedc27e0e7"
+          }
+        },
+        {
+          "client_id": "480946073496-n3p7jqohu1fruq7r2u4e6tubiqb3mfal.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfMW-QdemK7GDXVt143gMO5QNK7WtK1DQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "480946073496-n3p7jqohu1fruq7r2u4e6tubiqb3mfal.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "480946073496-ursfu0jg7f3kgr4p2i0oln3n86hbmfhr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.kunutech.kunutech"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
