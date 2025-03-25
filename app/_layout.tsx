@@ -12,6 +12,7 @@ import { useColorScheme } from "~/lib/useColorScheme";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NAV_THEME } from "~/lib/constants";
+import { PortalHost } from "@rn-primitives/portal";
 
 // Light & Dark Theme Setup
 const LIGHT_THEME: Theme = { ...DefaultTheme, colors: NAV_THEME.light };
@@ -22,7 +23,6 @@ export default function RootLayout() {
   const { colorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
 
-  // ✅ Setup Navigation Bar & Theme
   React.useEffect(() => {
     if (hasMounted.current) return;
     if (Platform.OS === "web")
@@ -50,8 +50,10 @@ export default function RootLayout() {
           }}
         >
           <Stack.Screen name="index" options={{ title: "Welcome" }} />
+          <Stack.Screen name="lost-item" options={{ title: "Lost Item" }} />
         </Stack>
       </ThemeProvider>
+      <PortalHost />
     </GestureHandlerRootView>
   );
 }
