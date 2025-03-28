@@ -1,0 +1,39 @@
+name: Build Expo APK
+
+on:
+  push:
+    branches:
+      - main # Trigger on main branch push
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest # Can be changed to self-hosted EC2 runner
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build APK
+        run: eas build --profile preview --platform android --non-interactive
+
+      - name: Upload APK to AWS S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_BUCKET: "kunu-expo"
+        run: |
+          apk_file=$(ls ./build/*.apk | head -n 1)
+          aws s3 cp $apk_file s3://$AWS_BUCKET/app.apk --acl public-read
+          echo "Download Link: https://$AWS_BUCKET.s3.amazonaws.com/app.apk"
+
+      - name: Notify on Success
+        run: echo "Build completed successfully!"

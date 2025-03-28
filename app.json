@@ -75,6 +75,30 @@
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
           "recordAudioAndroid": true
         }
+      ],
+      [
+        "expo-sensors",
+        {
+          "accelerometerPermission": "Allow $(PRODUCT_NAME) to access your accelerometer",
+          "gyroscopePermission": "Allow $(PRODUCT_NAME) to access your gyroscope",
+          "magnetometerPermission": "Allow $(PRODUCT_NAME) to access your magnetometer",
+          "pedometerPermission": "Allow $(PRODUCT_NAME) to access your pedometer"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationPermission": "Allow $(PRODUCT_NAME) to access your location",
+          "locationAlwaysPermission": "Allow $(PRODUCT_NAME) to access your location even when the app is in the background."
+        }
+      ],
+      [
+        "with-rn-bluetooth-classic",
+        {
+          "peripheralUsageDescription": "Allow myDevice to check bluetooth peripheral info",
+          "alwaysUsageDescription": "Allow myDevice to always use bluetooth info",
+          "protocols": ["com.myCompany.p1", "com.myCompany.p2"]
+        }
       ]
     ],
     "experiments": {
