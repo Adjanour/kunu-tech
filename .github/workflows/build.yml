@@ -1,39 +1,51 @@
-name: Build Expo APK
+name: Build Expo APK on EC2
 
 on:
   push:
     branches:
-      - main # Trigger on main branch push
-  workflow_dispatch: # Allows manual trigger
+      - main
+  workflow_dispatch:
 
 jobs:
   build-apk:
-    runs-on: ubuntu-latest # Can be changed to self-hosted EC2 runner
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
         with:
-          node-version: 18
+          ssh-private-key: ${{ secrets.KUNU-UBUNTU }}
 
-      - name: Install dependencies
-        run: yarn install
+      - name: Build APK on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+            # Navigate to project folder or clone fresh
+            cd /home/ec2-user/app || mkdir /home/ec2-user/app && cd /home/ec2-user/app
+            git pull origin main || git clone https://github.com/Adjanour/kunu-tech.git .
 
-      - name: Build APK
-        run: eas build --profile preview --platform android --non-interactive
+            # Install dependencies
+            yarn install
 
-      - name: Upload APK to AWS S3
+            # Build APK locally on EC2
+            eas build --platform android --profile preview --non-interactive --local
+
+            # Find APK and move it to a known location
+            mkdir -p /home/ec2-user/builds
+            cp $(find . -name "*.apk" | head -n 1) /home/ec2-user/builds/app.apk
+          EOF
+
+      - name: Upload APK to S3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
           AWS_BUCKET: "kunu-expo"
         run: |
-          apk_file=$(ls ./build/*.apk | head -n 1)
-          aws s3 cp $apk_file s3://$AWS_BUCKET/app.apk --acl public-read
+          scp -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/builds/app.apk .
+          aws s3 cp app.apk s3://$AWS_BUCKET/app.apk --acl public-read
           echo "Download Link: https://$AWS_BUCKET.s3.amazonaws.com/app.apk"
 
       - name: Notify on Success
-        run: echo "Build completed successfully!"
+        run: echo "APK Build & Deployment Complete!"
