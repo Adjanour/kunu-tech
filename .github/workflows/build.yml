@@ -23,7 +23,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
             # Navigate to project folder or clone fresh
-            cd /home/ec2-user/app || mkdir /home/ec2-user/app && cd /home/ec2-user/app
+            cd /home/ubuntu/app || mkdir /home/ubuntu/app && cd /home/ubuntu/app
             git pull origin main || git clone https://github.com/Adjanour/kunu-tech.git .
 
             # Install dependencies
@@ -33,8 +33,8 @@ jobs:
             eas build --platform android --profile preview --non-interactive --local
 
             # Find APK and move it to a known location
-            mkdir -p /home/ec2-user/builds
-            cp $(find . -name "*.apk" | head -n 1) /home/ec2-user/builds/app.apk
+            mkdir -p /home/ubuntu/builds
+            cp $(find . -name "*.apk" | head -n 1) /home/ubuntu/builds/app.apk
           EOF
 
       - name: Upload APK to S3
@@ -43,7 +43,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
           AWS_BUCKET: "kunu-expo"
         run: |
-          scp -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/builds/app.apk .
+          scp -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/builds/app.apk .
           aws s3 cp app.apk s3://$AWS_BUCKET/app.apk --acl public-read
           echo "Download Link: https://$AWS_BUCKET.s3.amazonaws.com/app.apk"
 
