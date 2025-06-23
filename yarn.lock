@@ -6874,6 +6874,11 @@ react-native-ble-advertise@^2.0.3:
   resolved "https://registry.yarnpkg.com/react-native-ble-advertise/-/react-native-ble-advertise-2.0.3.tgz#df7115bc1ad8a03c3d1bbb8bfc2eba1c959f16b6"
   integrity sha512-BwCIdx1ea0swt837Rx5pswwhieWnpOc77fpFiREHh7q663uKzSphb/LdnDKdQkKhyjkyX+tmGk6r1FHPyskPsA==
 
+react-native-ble-manager@^12.1.5:
+  version "12.1.5"
+  resolved "https://registry.yarnpkg.com/react-native-ble-manager/-/react-native-ble-manager-12.1.5.tgz#84d3a521c1e51eb0a30f1bbb0c00c3930b62b00a"
+  integrity sha512-kTt2nYBnouyOyw9TN37dDuUAdhtcg1pduF+XSRCBXoBEWp6F5u4P16ISoo25rpc19R9dE2hSovoMSDwwwCaWsw==
+
 react-native-ble-plx@^3.5.0:
   version "3.5.0"
   resolved "https://registry.npmjs.org/react-native-ble-plx/-/react-native-ble-plx-3.5.0.tgz"

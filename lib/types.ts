@@ -9,6 +9,7 @@ export interface TelemetryData {
   status?: 'Normal' | 'Fatigue Alert';
   speed?: number;
   engineStatus?: string;
+  cachedAt?: number;
 }
 
 export interface HealthData {
@@ -16,4 +17,5 @@ export interface HealthData {
   timestamp: number;
   rssi: number;
   latency: number;
+  cachedAt?: number;
 }

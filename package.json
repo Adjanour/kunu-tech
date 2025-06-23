@@ -59,6 +59,7 @@
     "react-native": "0.76.7",
     "react-native-base64": "^0.2.1",
     "react-native-ble-advertise": "^2.0.3",
+    "react-native-ble-manager": "^12.1.5",
     "react-native-ble-plx": "^3.5.0",
     "react-native-bluetooth-classic": "^1.73.0-rc.13",
     "react-native-gesture-handler": "~2.20.2",
