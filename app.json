@@ -25,7 +25,12 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.kunutech.kunutech",
-      "googleServicesFile": "./lib/google-services.json"
+      "googleServicesFile": "./lib/google-services.json",
+      "permissions":[
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_ADVERTISE"
+      ]
     },
     "web": {
       "bundler": "metro",

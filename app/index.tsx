@@ -1,191 +1,280 @@
-import "global.css";
-import * as React from "react";
-import { useState, useRef, useCallback } from "react";
-import {
-  View,
-  useColorScheme,
-  TextInput,
-  FlatList,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Feather } from "@expo/vector-icons";
-import { Button } from "~/components/ui/button";
-import ItemDetailCard from "~/components/itemDetailCard";
-import ToggleButton from "~/components/toggleButton";
-import MapboxGL from "@rnmapbox/maps";
-import {
-  BottomSheetModal,
-  BottomSheetModalProvider,
-} from "@gorhom/bottom-sheet";
-import { BottomSheetView } from "@gorhom/bottom-sheet";
-import { QRScanner, BluetoothScanner } from "~/components/qrBlueetoothScanners";
-import ItemCard, { Item, items } from "~/components/itemCard";
-import RegisterDeviceSheet from "~/components/registerDeviceBottomSheet";
-import { ConnectionMethod } from "~/components/registerDeviceBottomSheet";
-import Header from "~/components/header";
-import AddItemBottomSheet from "~/components/addItemBottomSheet";
-import useBLE from "~/lib/useBLE";
-import DeviceModal from "~/components/DeviceConnectionModal";
-import { Link } from "expo-router";
+// src/App.tsx
+import 'global.css'; // Ensure global styles are applied
+import React, { useState } from 'react';
+import { ScrollView, View, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-MapboxGL.setAccessToken("YOUR_ACCESS_TOKEN");
+import DeviceConfig from '../components/DeviceConfig';
+import DataCollector from '../components/DataCollector';
+import MeshManager from '../components/MeshManager';
+import HealthMonitor from '../components/HealthMonitor';
+import { DeviceType } from '../lib/types';
 
-interface SearchBarProps {
-  isDarkMode: boolean;
-}
+// React Native Reusables imports
+import { Text } from '~/components/ui/text';
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { Badge } from '~/components/ui/badge';
+import { Button } from '~/components/ui/button';
+import { Separator } from '~/components/ui/separator';
+import { ToastAndroid } from 'react-native';
+// Icons
+import { 
+  Smartphone, 
+  Wifi, 
+  WifiOff, 
+  Settings, 
+  Activity,
+  Bluetooth,
+  RefreshCw
+} from 'lucide-react-native';
 
-const SearchBar: React.FC<SearchBarProps> = ({ isDarkMode }) => (
-  <View className="flex flex-row items-center border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 mt-4">
-    <Feather name="search" size={20} color="gray" />
-    <TextInput
-      placeholder="Search"
-      placeholderTextColor={isDarkMode ? "gray" : "black"}
-      className="flex-1 px-2 py-1 text-black dark:text-white bg-transparent"
-    />
-  </View>
-);
+const App: React.FC = () => {
+  const [deviceType, setDeviceType] = useState<DeviceType | null>(null);
+  const [deviceId] = useState<string>(Math.random().toString(36).slice(2, 8).toUpperCase());
+  const [isOnline, setIsOnline] = useState<boolean>(false);
 
-export default function Welcome() {
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === "dark";
-
-  const {
-    requestPermissions,
-    scanForPeripherals,
-    allDevices,
-    connectToDevice,
-    connectedDevice,
-    disconnectFromDevice,
-  } = useBLE();
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-
-  const scanForDevices = async () => {
-    const isPermissionsEnabled = await requestPermissions();
-    if (isPermissionsEnabled) {
-      scanForPeripherals();
-    }
+  const handleConfig = (type: DeviceType) => {
+    setDeviceType(type);
+    ToastAndroid.show(
+      "Device Configured",
+      ToastAndroid.SHORT,
+    );
   };
 
-  const hideModal = () => {
-    setIsModalVisible(false);
+  const handleReset = () => {
+    setDeviceType(null);
+    setIsOnline(false);
+    ToastAndroid.show(
+      "Device Reset",
+      ToastAndroid.SHORT,
+    ); 
   };
 
-  const openModal = async () => {
-    scanForDevices();
-    setIsModalVisible(true);
+  const getDeviceIcon = () => {
+    if (!deviceType) return <Settings className="h-6 w-6 text-muted-foreground" />;
+    return deviceType === 'Human' ? 
+      <Activity className="h-6 w-6 text-blue-500" /> : 
+      <Smartphone className="h-6 w-6 text-green-500" />;
   };
-  const [selectedItem, setSelectedItem] = useState<Item | null>(items[0]);
 
-  const bottomSheetRef = useRef<BottomSheetModal>(null);
-  const addItemBottomSheetRef = useRef<BottomSheetModal>(null);
+  const getStatusColor = () => {
+    return isOnline ? 'text-green-500' : 'text-red-500';
+  };
 
-  const handlePresentModalPress = useCallback(() => {
-    bottomSheetRef.current?.present();
-  }, []);
+  const getStatusIcon = () => {
+    return isOnline ? 
+      <Wifi className="h-4 w-4 text-green-500" /> : 
+      <WifiOff className="h-4 w-4 text-red-500" />;
+  };
 
-  const handleAddItemPress = useCallback(() => {
-    addItemBottomSheetRef.current?.present();
-  }, []);
+  const getDeviceTypeColor = () => {
+    if (!deviceType) return 'text-muted-foreground';
+    return deviceType === 'Human' ? 'text-blue-500' : 'text-green-500';
+  };
 
   return (
-    <BottomSheetModalProvider>
-      <SafeAreaView
-        className={`flex-1 p-4 ${isDarkMode ? "bg-gray-900" : "bg-white"}`}
+    <SafeAreaView className="flex-1 bg-background">
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      
+      {/* Header Section */}
+      <View className="px-6 pt-4 pb-2">
+        <Card>
+          <CardHeader className="pb-4">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-3">
+                <Bluetooth className="h-8 w-8 text-primary" />
+                <View>
+                  <CardTitle className="text-2xl">BLE Mesh Demo</CardTitle>
+                  <Text className="text-sm text-muted-foreground">
+                    Bluetooth Low Energy Mesh Network
+                  </Text>
+                </View>
+              </View>
+              
+              {deviceType && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onPress={handleReset}
+                  className="flex-row items-center"
+                >
+                  <Text>Reset</Text>
+                </Button>
+              )}
+            </View>
+          </CardHeader>
+          
+          <CardContent>
+            {/* Device Info Row */}
+            <View className="flex-row items-center justify-between mb-4">
+              <View className="flex-row items-center gap-2">
+                {getDeviceIcon()}
+                <View>
+                  <Text className="font-medium">Device ID</Text>
+                  <Text className="text-sm text-muted-foreground font-mono">
+                    {deviceId}
+                  </Text>
+                </View>
+              </View>
+              
+              <View className="items-end">
+                <Text className="text-sm text-muted-foreground mb-1">Type</Text>
+                <Badge 
+                  variant={deviceType ? "default" : "secondary"}
+                  className={deviceType ? "" : "bg-gray-100"}
+                >
+                  <Text className={getDeviceTypeColor()}>
+                  {deviceType || 'Not Configured'}
+                  </Text>
+                </Badge>
+              </View>
+            </View>
+
+            <Separator className="my-4" />
+
+            {/* Status Row */}
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2">
+                {getStatusIcon()}
+                <Text className="font-medium">Connection Status</Text>
+              </View>
+              
+              <View className="flex-row items-center gap-2">
+                <View className={`h-2 w-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
+                <Text className={`font-medium ${getStatusColor()}`}>
+                  {isOnline ? 'Online' : 'Offline'}
+                </Text>
+              </View>
+            </View>
+          </CardContent>
+        </Card>
+      </View>
+
+      {/* Main Content */}
+      <ScrollView 
+        className="flex-1" 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 20 }}
       >
-        <Header
-          onRegisterPress={handlePresentModalPress}
-          onAddPress={handleAddItemPress}
-        />
-        <SearchBar isDarkMode={isDarkMode} />
-        <View className="py-4">
-          <ToggleButton
-            options={["Items", "People"]}
-            onToggle={(state) => console.log("Toggled to:", state)}
-          />
-        </View>
-        {/* {selectedItem && <ItemDetailCard item={selectedItem} />}
-        <FlatList
-          data={items}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <ItemCard item={item} onSelect={setSelectedItem} />
-          )}
-        /> */}
-        {/* <View style={styles.heartRateTitleWrapper}>
-          {connectedDevice ? (
-            <>
-              <Text style={styles.heartRateTitleText}>Your Heart Rate Is:</Text>
-            </>
-          ) : (
-            <Text style={styles.heartRateTitleText}>
-              Please Connect to a Heart Rate Monitor
-            </Text>
-          )}
-        </View> */}
-        {/* <TouchableOpacity
-          onPress={connectedDevice ? disconnectFromDevice : openModal}
-          style={styles.ctaButton}
-        >
-          <Text style={styles.ctaButtonText}>
-            {connectedDevice ? "Disconnect" : "Connect"}
-          </Text>
-        </TouchableOpacity> */}
-        <TouchableOpacity>
-          <Link href={"/home"}>
-            <Text>Home</Text>
-          </Link>
-        </TouchableOpacity>
-        <DeviceModal
-          closeModal={hideModal}
-          visible={isModalVisible}
-          connectToPeripheral={connectToDevice}
-          devices={allDevices}
-        />
+        {!deviceType ? (
+          /* Configuration Screen */
+          <View className="px-6">
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle className="text-center text-xl">
+                  Welcome to BLE Mesh Demo
+                </CardTitle>
+                
+              </CardHeader>
+              <CardContent>
+                <DeviceConfig onConfig={handleConfig} />
+              </CardContent>
+            </Card>
 
-        <RegisterDeviceSheet bottomSheetRef={bottomSheetRef} />
-        <AddItemBottomSheet addItemBottomSheetRef={addItemBottomSheetRef} />
-      </SafeAreaView>
-    </BottomSheetModalProvider>
+            {/* Info Cards */}
+            <View className="mt-6 gap-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <View className="flex-row items-center gap-3 mb-2">
+                    <Activity className="h-5 w-5 text-blue-500" />
+                    <Text className="font-medium">Human Device</Text>
+                  </View>
+                  <Text className="text-sm text-muted-foreground">
+                    Monitor health metrics like heart rate and fatigue levels
+                  </Text>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <View className="flex-row items-center gap-3 mb-2">
+                    <Smartphone className="h-5 w-5 text-green-500" />
+                    <Text className="font-medium">Machine Device</Text>
+                  </View>
+                  <Text className="text-sm text-muted-foreground">
+                    Track machine performance, speed, and engine status
+                  </Text>
+                </CardContent>
+              </Card>
+            </View>
+          </View>
+        ) : (
+          /* Main Application Interface */
+          <View className="px-6">
+            {/* Quick Stats */}
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle className="text-lg">Device Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <View className="flex-row justify-between">
+                  <View className="items-center">
+                    <Text className={`text-2xl font-bold ${getDeviceTypeColor()}`}>
+                      {deviceType}
+                    </Text>
+                    <Text className="text-sm text-muted-foreground">Device Type</Text>
+                  </View>
+                  <View className="items-center">
+                    <Text className={`text-2xl font-bold ${getStatusColor()}`}>
+                      {isOnline ? '100%' : '0%'}
+                    </Text>
+                    <Text className="text-sm text-muted-foreground">Connectivity</Text>
+                  </View>
+                  <View className="items-center">
+                    <Text className="text-2xl font-bold text-primary">
+                      {deviceId}
+                    </Text>
+                    <Text className="text-sm text-muted-foreground">Node ID</Text>
+                  </View>
+                </View>
+              </CardContent>
+            </Card>
+
+            {/* Component Sections */}
+            <View className="mt-6">
+              {/* Data Collection Section */}
+              <View className="mb-6">
+                <View className="flex-row items-center gap-2 mb-3">
+                  <Activity className="h-5 w-5 text-primary" />
+                  <Text className="text-lg font-semibold">Data Collection</Text>
+                </View>
+                <DataCollector 
+                  deviceType={deviceType} 
+                  deviceId={deviceId} 
+                  isOnline={isOnline} 
+                />
+              </View>
+
+              {/* Mesh Network Section */}
+              <View className="mb-6">
+                <View className="flex-row items-center gap-2 mb-3">
+                  <Bluetooth className="h-5 w-5 text-primary" />
+                  <Text className="text-lg font-semibold">Mesh Network</Text>
+                </View>
+                <MeshManager 
+                  deviceId={deviceId} 
+                  setIsOnline={setIsOnline} 
+                  isOnline={isOnline} 
+                />
+              </View>
+
+              {/* Health Monitoring Section */}
+              <View className="mb-6">
+                <View className="flex-row items-center gap-2 mb-3">
+                  <Wifi className="h-5 w-5 text-primary" />
+                  <Text className="text-lg font-semibold">Health Monitor</Text>
+                </View>
+                <HealthMonitor 
+                  deviceId={deviceId} 
+                  isOnline={isOnline} 
+                />
+              </View>
+            </View>
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f2f2f2",
-  },
-  heartRateTitleWrapper: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  heartRateTitleText: {
-    fontSize: 30,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginHorizontal: 20,
-    color: "black",
-  },
-  heartRateText: {
-    fontSize: 25,
-    marginTop: 15,
-  },
-  ctaButton: {
-    backgroundColor: "#FF6060",
-    justifyContent: "center",
-    alignItems: "center",
-    height: 50,
-    marginHorizontal: 20,
-    marginBottom: 5,
-    borderRadius: 8,
-  },
-  ctaButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "white",
-  },
-});
+export default App;
